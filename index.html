@@ -1,377 +1,1677 @@
-  <!DOCTYPE html>
-  <html lang="es">
-  <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>WealthTracker Pro - Dashboard Financiero</title>
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
-      <style>
-          :root {
-              --primary-color: #007bff;
-              --secondary-color: #6c757d;
-              --success-color: #28a745;
-              --danger-color: #dc3545;
-              --bg-light: #f8f9fa;
-              --text-dark: #343a40;
-          }
-          body {
-              font-family: 'Inter', sans-serif;
-              background-color: var(--bg-light);
-              color: var(--text-dark);
-              margin: 0;
-              padding: 0;
-          }
-          .header {
-              background-color: var(--primary-color);
-              color: white;
-              padding: 20px;
-              text-align: center;
-              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          }
-          .container {
-              display: flex;
-              max-width: 1400px;
-              margin: 20px auto;
-              gap: 20px;
-          }
-          .sidebar {
-              flex: 0 0 250px;
-              background-color: white;
-              padding: 20px;
-              border-radius: 12px;
-              box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-              height: fit-content;
-          }
-          .main-content {
-              flex-grow: 1;
-          }
-          .card {
-              background-color: white;
-              padding: 20px;
-              border-radius: 12px;
-              box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-              margin-bottom: 20px;
-          }
-          h2 {
-              color: var(--primary-color);
-              border-bottom: 2px solid var(--bg-light);
-              padding-bottom: 10px;
-              margin-top: 0;
-          }
-          /* Forms & Inputs */
-          input, select, button {
-              width: 100%;
-              padding: 10px;
-              margin-bottom: 10px;
-              border: 1px solid #ccc;
-              border-radius: 6px;
-              box-sizing: border-box;
-          }
-          button {
-              background-color: var(--primary-color);
-              color: white;
-              border: none;
-              cursor: pointer;
-              transition: background-color 0.2s;
-          }
-          button:hover {
-              background-color: #0056b3;
-          }
-          .balance-card {
-              text-align: center;
-              margin-bottom: 20px;
-          }
-          .balance-card h3 {
-              margin: 0;
-              font-size: 1.1rem;
-              color: var(--secondary-color);
-          }
-          .balance-card p {
-              font-size: 2.5rem;
-              font-weight: 700;
-              margin: 5px 0 0;
-          }
-          .transaction-list, .portfolio-list {
-              list-style: none;
-              padding: 0;
-          }
-          .transaction-item, .asset-item {
-              display: flex;
-              justify-content: space-between;
-              padding: 10px 0;
-              border-bottom: 1px dashed #eee;
-          }
-          .transaction-item:last-child, .asset-item:last-child {
-              border-bottom: none;
-          }
-          .amount {
-              font-weight: 600;
-          }
-          .income .amount { color: var(--success-color); }
-          .expense .amount { color: var(--danger-color); }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanceFlow Pro - Personal Finance Dashboard</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#667eea',
+                        secondary: '#764ba2',
+                        success: '#4caf50',
+                        danger: '#f44336',
+                        warning: '#ff9800',
+                        info: '#2196f3'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .dark .glass {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .transaction-income {
+            border-left: 4px solid #4caf50;
+        }
+        
+        .transaction-expense {
+            border-left: 4px solid #f44336;
+        }
+        
+        .transaction-investment {
+            border-left: 4px solid #2196f3;
+        }
+        
+        .stat-card {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+        
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: .5;
+            }
+        }
+        
+        .shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    
+    <!-- Header -->
+    <header class="gradient-bg shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                        <i class="fas fa-wallet text-2xl text-primary"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">FinanceFlow Pro</h1>
+                        <p class="text-sm text-gray-200">Master Your Money</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <!-- Dark Mode Toggle -->
+                    <button id="darkModeToggle" class="glass px-4 py-2 rounded-lg text-white hover:bg-white/20 transition">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    
+                    <!-- Export Data -->
+                    <button onclick="exportData()" class="glass px-4 py-2 rounded-lg text-white hover:bg-white/20 transition hidden md:flex items-center space-x-2">
+                        <i class="fas fa-download"></i>
+                        <span>Export</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
 
-          /* Chart Styling (Placeholder) */
-          #chart-area {
-              height: 300px;
-              background-color: #f0f2f5;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              border-radius: 8px;
-              margin-top: 15px;
-              color: var(--secondary-color);
-          }
-      </style>
-  </head>
-  <body>
+    <!-- Navigation Tabs -->
+    <nav class="bg-white dark:bg-gray-800 shadow-md sticky top-16 z-40">
+        <div class="container mx-auto px-4">
+            <div class="flex space-x-1 overflow-x-auto scrollbar-hide">
+                <button onclick="switchTab('dashboard')" class="tab-button px-6 py-4 font-semibold text-gray-600 dark:text-gray-300 hover:text-primary transition whitespace-nowrap border-b-4 border-transparent" data-tab="dashboard">
+                    <i class="fas fa-chart-line mr-2"></i>Dashboard
+                </button>
+                <button onclick="switchTab('transactions')" class="tab-button px-6 py-4 font-semibold text-gray-600 dark:text-gray-300 hover:text-primary transition whitespace-nowrap border-b-4 border-transparent" data-tab="transactions">
+                    <i class="fas fa-exchange-alt mr-2"></i>Transactions
+                </button>
+                <button onclick="switchTab('investments')" class="tab-button px-6 py-4 font-semibold text-gray-600 dark:text-gray-300 hover:text-primary transition whitespace-nowrap border-b-4 border-transparent" data-tab="investments">
+                    <i class="fas fa-chart-pie mr-2"></i>Investments
+                </button>
+                <button onclick="switchTab('predictor')" class="tab-button px-6 py-4 font-semibold text-gray-600 dark:text-gray-300 hover:text-primary transition whitespace-nowrap border-b-4 border-transparent" data-tab="predictor">
+                    <i class="fas fa-crystal-ball mr-2"></i>Predictor
+                </button>
+                <button onclick="switchTab('budget')" class="tab-button px-6 py-4 font-semibold text-gray-600 dark:text-gray-300 hover:text-primary transition whitespace-nowrap border-b-4 border-transparent" data-tab="budget">
+                    <i class="fas fa-piggy-bank mr-2"></i>Budget
+                </button>
+            </div>
+        </div>
+    </nav>
 
-      <header class="header">
-          <h1>🏛️ WealthTracker Pro</h1>
-          <p>Gestión financiera integral y predicción de patrimonio.</p>
-      </header>
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        
+        <!-- DASHBOARD TAB -->
+        <div id="dashboard-tab" class="tab-content">
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-fade-in">
+                <!-- Total Balance -->
+                <div class="stat-card bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 card-hover">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-wallet text-white text-xl"></i>
+                        </div>
+                        <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">TOTAL</span>
+                    </div>
+                    <h3 class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Net Worth</h3>
+                    <p id="totalBalance" class="text-3xl font-bold text-gray-800 dark:text-white">€0.00</p>
+                    <div class="mt-4 flex items-center text-sm">
+                        <span id="balanceChange" class="text-green-500 font-semibold"><i class="fas fa-arrow-up mr-1"></i>0%</span>
+                        <span class="text-gray-400 ml-2">vs last month</span>
+                    </div>
+                </div>
 
-      <div class="container">
+                <!-- Income -->
+                <div class="stat-card bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 card-hover">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-arrow-down text-white text-xl"></i>
+                        </div>
+                        <span class="text-xs font-semibold text-green-600 bg-green-100 px-3 py-1 rounded-full">INCOME</span>
+                    </div>
+                    <h3 class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">This Month</h3>
+                    <p id="monthIncome" class="text-3xl font-bold text-green-600">€0.00</p>
+                    <div class="mt-4 h-1 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div id="incomeProgress" class="h-full bg-green-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
 
-          <!-- SIDEBAR: Quick Actions & Portfolio Snapshot -->
-          <aside class="sidebar">
-              <div class="card">
-                  <h3>💰 Resumen Rápido</h3>
-                  <div class="balance-card">
-                      <h3>Saldo Actual</h3>
-                      <p id="current-balance">$15,000.00</p>
-                  </div>
-                  <button onclick="App.showSection('transactions')">➕ Registrar Transacción</button>
-                  <button style="background-color: var(--secondary-color); margin-top: 10px;"
-  onclick="App.showSection('portfolio')">📈 Ver Portafolio</button>
-              </div>
+                <!-- Expenses -->
+                <div class="stat-card bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 card-hover">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-arrow-up text-white text-xl"></i>
+                        </div>
+                        <span class="text-xs font-semibold text-red-600 bg-red-100 px-3 py-1 rounded-full">EXPENSES</span>
+                    </div>
+                    <h3 class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">This Month</h3>
+                    <p id="monthExpenses" class="text-3xl font-bold text-red-600">€0.00</p>
+                    <div class="mt-4 h-1 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div id="expensesProgress" class="h-full bg-red-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
 
-              <div class="card">
-                  <h3>📊 Rendimiento Hoy</h3>
-                  <p id="daily-gain" style="font-size: 1.5rem; color: var(--success-color);">$+12.50</p>
-                  <p style="font-size: 0.9rem; margin-top: 15px;">(Simulado)</p>
-              </div>
-          </aside>
+                <!-- Investments -->
+                <div class="stat-card bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 card-hover">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-chart-line text-white text-xl"></i>
+                        </div>
+                        <span class="text-xs font-semibold text-blue-600 bg-blue-100 px-3 py-1 rounded-full">PORTFOLIO</span>
+                    </div>
+                    <h3 class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Total Invested</h3>
+                    <p id="totalInvestments" class="text-3xl font-bold text-blue-600">€0.00</p>
+                    <div class="mt-4 flex items-center text-sm">
+                        <span id="investmentReturn" class="text-blue-500 font-semibold"><i class="fas fa-chart-line mr-1"></i>0% ROI</span>
+                    </div>
+                </div>
+            </div>
 
-          <!-- MAIN CONTENT AREA -->
-          <main class="main-content">
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Income vs Expenses Chart -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-chart-bar text-primary mr-3"></i>
+                        Income vs Expenses (6 Months)
+                    </h3>
+                    <canvas id="incomeExpensesChart" height="300"></canvas>
+                </div>
 
-              <!-- SECTION 1: TRANSACCIONES -->
-              <section id="transactions-section" class="card">
-                  <h2>🧾 Transacciones</h2>
+                <!-- Portfolio Distribution -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-chart-pie text-primary mr-3"></i>
+                        Portfolio Distribution
+                    </h3>
+                    <canvas id="portfolioChart" height="300"></canvas>
+                </div>
+            </div>
 
-                  <!-- Add Transaction Form -->
-                  <div id="add-transaction-card" class="card" style="background-color: #e9ecef;">
-                      <h4>Añadir Nueva Transacción</h4>
-                      <select id="trans-type">
-                          <option value="income">Ingreso</option>
-                          <option value="expense">Gasto</option>
-                      </select>
-                      <input type="text" id="trans-description" placeholder="Descripción (Ej: Nómina, Comida)">
-                      <input type="number" id="trans-amount" placeholder="Monto ($)">
-                      <button onclick="App.addTransaction()">Guardar Transacción</button>
-                  </div>
+            <!-- Recent Transactions & Quick Stats -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Recent Transactions -->
+                <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white flex items-center">
+                            <i class="fas fa-history text-primary mr-3"></i>
+                            Recent Transactions
+                        </h3>
+                        <button onclick="switchTab('transactions')" class="text-primary hover:text-secondary text-sm font-semibold">
+                            View All <i class="fas fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                    <div id="recentTransactions" class="space-y-3 max-h-96 overflow-y-auto scrollbar-hide"></div>
+                </div>
 
-                  <!-- Transaction List -->
-                  <h3>Últimas Movimientos</h3>
-                  <div id="transaction-list">
-                      <!-- Transactions will be listed here -->
-                  </div>
-              </section>
+                <!-- Quick Actions -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
+                        <i class="fas fa-bolt text-primary mr-3"></i>
+                        Quick Actions
+                    </h3>
+                    <div class="space-y-3">
+                        <button onclick="switchTab('transactions'); setTimeout(() => document.getElementById('typeTransaction').value = 'income', 100)" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center space-x-2">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Add Income</span>
+                        </button>
+                        <button onclick="switchTab('transactions'); setTimeout(() => document.getElementById('typeTransaction').value = 'expense', 100)" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center space-x-2">
+                            <i class="fas fa-minus-circle"></i>
+                            <span>Add Expense</span>
+                        </button>
+                        <button onclick="switchTab('investments')" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center space-x-2">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Add Investment</span>
+                        </button>
+                        <button onclick="switchTab('predictor'); calculatePredictions()" class="w-full gradient-bg hover:opacity-90 text-white font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center space-x-2">
+                            <i class="fas fa-magic"></i>
+                            <span>View Predictions</span>
+                        </button>
+                    </div>
 
-              <!--
-              <div id="hidden-section" style="display: none;">
-                  <section id="investments-section">
-                      <h2>Gestión de Inversiones</h2>
-                      <p>Aquí iría el gráfico de rendimiento.</p>
-                  </section>
-              </div>
-              -->
+                    <!-- Crypto Prices Widget -->
+                    <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                        <h4 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-3">Live Crypto Prices</h4>
+                        <div id="cryptoPrices" class="space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-          </section>
-      </div>
+        <!-- TRANSACTIONS TAB -->
+        <div id="transactions-tab" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Add Transaction Form -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 sticky top-32">
+                        <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
+                            <i class="fas fa-plus-circle text-primary mr-3"></i>
+                            New Transaction
+                        </h3>
+                        <form id="transactionForm" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Type</label>
+                                <select id="typeTransaction" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white transition">
+                                    <option value="income">💰 Income</option>
+                                    <option value="expense">💸 Expense</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Category</label>
+                                <select id="categoryTransaction" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white transition">
+                                    <option value="salary">💼 Salary</option>
+                                    <option value="freelance">💻 Freelance</option>
+                                    <option value="business">🏢 Business</option>
+                                    <option value="investment">📈 Investment Return</option>
+                                    <option value="food">🍔 Food & Dining</option>
+                                    <option value="transport">🚗 Transport</option>
+                                    <option value="entertainment">🎮 Entertainment</option>
+                                    <option value="housing">🏠 Housing</option>
+                                    <option value="utilities">💡 Utilities</option>
+                                    <option value="healthcare">⚕️ Healthcare</option>
+                                    <option value="education">📚 Education</option>
+                                    <option value="shopping">🛍️ Shopping</option>
+                                    <option value="other">📦 Other</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Description</label>
+                                <input type="text" id="descriptionTransaction" placeholder="e.g., Monthly salary" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white transition" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Amount (€)</label>
+                                <input type="number" id="amountTransaction" placeholder="0.00" step="0.01" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white transition" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Date</label>
+                                <input type="date" id="dateTransaction" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white transition" required>
+                            </div>
+                            
+                            <button type="submit" class="w-full gradient-bg text-white font-bold py-4 px-6 rounded-lg hover:opacity-90 transition transform hover:scale-105 flex items-center justify-center space-x-2">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Add Transaction</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
 
-  <script>
-  // --- GLOBAL STATE & UTILITIES ---
-  let transactions = JSON.parse(localStorage.getItem('financeTrackerTransactions')) || [
-      { id: 1, description: 'Salario Mayo', amount: 3500, type: 'income', date: new Date().toLocaleDateString() },
-      { id: 2, description: 'Supermercado', amount: -85.50, type: 'expense', date: new Date().toLocaleDateString() },
-      { id: 3, description: 'Café con amigos', amount: -22.00, type: 'expense', date: new Date().toLocaleDateString() }
-  ];
+                <!-- Transactions List -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-2xl font-bold text-gray-800 dark:text-white flex items-center">
+                                <i class="fas fa-list text-primary mr-3"></i>
+                                All Transactions
+                            </h3>
+                            <div class="flex space-x-2">
+                                <select id="filterType" onchange="filterTransactions()" class="px-4 py-2 border-2 border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm">
+                                    <option value="all">All Types</option>
+                                    <option value="income">Income</option>
+                                    <option value="expense">Expense</option>
+                                </select>
+                                <input type="text" id="searchTransaction" onkeyup="filterTransactions()" placeholder="Search..." class="px-4 py-2 border-2 border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm w-48">
+                            </div>
+                        </div>
+                        <div id="allTransactions" class="space-y-3 max-h-[600px] overflow-y-auto scrollbar-hide"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-  // --- RENDERING FUNCTIONS ---
+        <!-- INVESTMENTS TAB -->
+        <div id="investments-tab" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Add Investment Form -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 sticky top-32">
+                        <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
+                            <i class="fas fa-chart-line text-primary mr-3"></i>
+                            New Investment
+                        </h3>
+                        <form id="investmentForm" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Type</label>
+                                <select id="typeInvestment" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white transition">
+                                    <option value="ETF">📊 ETF</option>
+                                    <option value="BTC">₿ Bitcoin</option>
+                                    <option value="ETH">⟠ Ethereum</option>
+                                    <option value="Stock">📈 Stock</option>
+                                    <option value="Fund">🏦 Mutual Fund</option>
+                                    <option value="Crypto">🪙 Other Crypto</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Name/Ticker</label>
+                                <input type="text" id="nameInvestment" placeholder="e.g., VWCE, BTC" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white transition" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Amount Invested (€)</label>
+                                <input type="number" id="amountInvestment" placeholder="0.00" step="0.01" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white transition" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Units/Shares</label>
+                                <input type="number" id="unitsInvestment" placeholder="0.0000" step="0.0001" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white transition" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Date</label>
+                                <input type="date" id="dateInvestment" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white transition" required>
+                            </div>
+                            
+                            <button type="submit" class="w-full gradient-bg text-white font-bold py-4 px-6 rounded-lg hover:opacity-90 transition transform hover:scale-105 flex items-center justify-center space-x-2">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Add Investment</span>
+                            </button>
+                        </form>
 
-  function renderTransactions() {
-      const listContainer = document.getElementById('transaction-list');
-      listContainer.innerHTML = '';
+                        <!-- Live Crypto Prices -->
+                        <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                            <h4 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-3">Live Market Prices</h4>
+                            <div id="marketPrices" class="space-y-3"></div>
+                        </div>
+                    </div>
+                </div>
 
-      if (transactions.length === 0) {
-          listContainer.innerHTML = '<p>Aún no hay transacciones registradas.</p>';
-          return;
-      }
+                <!-- Portfolio Overview -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+                            <div class="flex items-center justify-between mb-2">
+                                <i class="fas fa-chart-pie text-3xl opacity-80"></i>
+                                <span class="text-xs font-semibold bg-white/20 px-2 py-1 rounded">TOTAL</span>
+                            </div>
+                            <p class="text-sm opacity-90 mb-1">Portfolio Value</p>
+                            <p id="portfolioValue" class="text-2xl font-bold">€0.00</p>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white">
+                            <div class="flex items-center justify-between mb-2">
+                                <i class="fas fa-arrow-trend-up text-3xl opacity-80"></i>
+                                <span class="text-xs font-semibold bg-white/20 px-2 py-1 rounded">GAIN</span>
+                            </div>
+                            <p class="text-sm opacity-90 mb-1">Total P&L</p>
+                            <p id="portfolioPL" class="text-2xl font-bold">€0.00</p>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white">
+                            <div class="flex items-center justify-between mb-2">
+                                <i class="fas fa-percentage text-3xl opacity-80"></i>
+                                <span class="text-xs font-semibold bg-white/20 px-2 py-1 rounded">ROI</span>
+                            </div>
+                            <p class="text-sm opacity-90 mb-1">Return Rate</p>
+                            <p id="portfolioROI" class="text-2xl font-bold">0%</p>
+                        </div>
+                    </div>
 
-      // Sort by date (newest first)
-      const sortedTransactions = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+                    <!-- Investments List -->
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
+                            <i class="fas fa-briefcase text-primary mr-3"></i>
+                            My Investments
+                        </h3>
+                        <div id="investmentsList" class="space-y-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-      sortedTransactions.forEach(t => {
-          const isIncome = t.type === 'income';
-          const sign = isIncome ? '+' : '-';
-          const amountClass = isIncome ? 'text-success' : 'text-danger';
+        <!-- PREDICTOR TAB -->
+        <div id="predictor-tab" class="tab-content hidden">
+            <div class="max-w-6xl mx-auto space-y-6">
+                <!-- Parameters Card -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
+                        <i class="fas fa-sliders-h text-primary mr-3"></i>
+                        Prediction Parameters
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Monthly Savings (€)</label>
+                            <input type="number" id="monthlySavings" value="500" step="10" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white transition">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">How much you plan to save each month</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Expected Annual Return (%)</label>
+                            <input type="number" id="annualReturn" value="7" step="0.5" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white transition">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Average: Conservative 4%, Moderate 7%, Aggressive 10%</p>
+                        </div>
+                    </div>
+                    <button onclick="calculatePredictions()" class="mt-6 gradient-bg text-white font-bold py-4 px-8 rounded-lg hover:opacity-90 transition transform hover:scale-105 flex items-center space-x-2">
+                        <i class="fas fa-calculator"></i>
+                        <span>Calculate Projections</span>
+                    </button>
+                </div>
 
-          const transactionElement = document.createElement('div');
-          transactionElement.className = 'card mb-2 p-3';
-          transactionElement.style.borderLeft = `5px solid ${isIncome ? '#28a745' : '#dc3545'}`;
-          transactionElement.innerHTML = `
-              <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                      <strong>${t.description}</strong>
-                      <small class="d-block text-muted">${t.date}</small>
-                  </div>
-                  <div class="text-right">
-                      <h5 class="${amountClass} mb-0">${sign} ${Math.abs(t.amount).toFixed(2)}</h5>
-                      <small class="text-muted">${t.type === 'income' ? 'Ingreso' : 'Gasto'}</small>
-                  </div>
-              </div>
-          `;
-          listContainer.appendChild(transactionElement);
-      });
-  }
+                <!-- Predictions Grid -->
+                <div id="predictionsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
-  function updateBalanceDisplay() {
-      const balance = transactions.reduce((acc, t) => acc + t.amount, 0);
-      const balanceElement = document.getElementById('balance-display');
-      if (balanceElement) {
-          balanceElement.textContent = `$${balance.toFixed(2)}`;
-      } else {
-          // Simple calculation if element doesn't exist (for this example structure)
-          console.log(`Calculated Balance: $${balance.toFixed(2)}`);
-      }
-  }
+                <!-- Prediction Chart -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
+                        <i class="fas fa-chart-area text-primary mr-3"></i>
+                        Projected Wealth Growth
+                    </h3>
+                    <canvas id="predictionChart" height="100"></canvas>
+                </div>
 
-  function saveTransactions() {
-      localStorage.setItem('financeTrackerTransactions', JSON.stringify(transactions));
-  }
+                <!-- Analysis & Recommendations -->
+                <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg p-8 text-white">
+                    <h3 class="text-2xl font-bold mb-6 flex items-center">
+                        <i class="fas fa-lightbulb mr-3"></i>
+                        AI-Powered Analysis & Recommendations
+                    </h3>
+                    <div id="analysisContent" class="space-y-4 text-white/90"></div>
+                </div>
+            </div>
+        </div>
 
-  // --- EVENT HANDLERS ---
+        <!-- BUDGET TAB -->
+        <div id="budget-tab" class="tab-content hidden">
+            <div class="max-w-4xl mx-auto space-y-6">
+                <!-- Budget Overview -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
+                        <i class="fas fa-chart-pie text-primary mr-3"></i>
+                        Monthly Budget Overview
+                    </h3>
+                    
+                    <!-- 50/30/20 Rule -->
+                    <div class="mb-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-700 rounded-xl">
+                        <h4 class="text-lg font-bold text-gray-800 dark:text-white mb-4">50/30/20 Rule</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between mb-1 text-sm">
+                                    <span class="font-semibold text-gray-700 dark:text-gray-300">50% Needs (€<span id="needs50">0</span>)</span>
+                                    <span id="needsPercent" class="text-gray-600 dark:text-gray-400">0%</span>
+                                </div>
+                                <div class="h-3 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                                    <div id="needsBar" class="h-full bg-blue-500 transition-all duration-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between mb-1 text-sm">
+                                    <span class="font-semibold text-gray-700 dark:text-gray-300">30% Wants (€<span id="wants30">0</span>)</span>
+                                    <span id="wantsPercent" class="text-gray-600 dark:text-gray-400">0%</span>
+                                </div>
+                                <div class="h-3 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                                    <div id="wantsBar" class="h-full bg-purple-500 transition-all duration-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between mb-1 text-sm">
+                                    <span class="font-semibold text-gray-700 dark:text-gray-300">20% Savings (€<span id="savings20">0</span>)</span>
+                                    <span id="savingsPercent" class="text-gray-600 dark:text-gray-400">0%</span>
+                                </div>
+                                <div class="h-3 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                                    <div id="savingsBar" class="h-full bg-green-500 transition-all duration-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-  function handleAddTransaction(event) {
-      event.preventDefault();
+                    <!-- Category Budgets -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="categoryBudgets"></div>
+                </div>
 
-      const form = event.target;
-      const description = form.description.value.trim();
-      const amount = parseFloat(form.amount.value);
-      const type = form.type.value;
-      const date = form.date.value || new Date().toLocaleDateString();
+                <!-- Budget Insights -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
+                        <i class="fas fa-brain text-primary mr-3"></i>
+                        Budget Insights
+                    </h3>
+                    <div id="budgetInsights" class="space-y-4"></div>
+                </div>
+            </div>
+        </div>
 
-      if (!description || isNaN(amount) || amount === 0) {
-          alert('Por favor, ingrese una descripción y un monto válido.');
-          return;
-      }
+    </main>
 
-      // Normalize amount: Expenses are negative values in storage
-      const finalAmount = type === 'expense' ? -Math.abs(amount) : Math.abs(amount);
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-8 right-8 transform translate-y-32 transition-all duration-300 z-50">
+        <div class="bg-gray-900 text-white px-6 py-4 rounded-lg shadow-2xl flex items-center space-x-3">
+            <i id="toastIcon" class="fas fa-check-circle text-2xl"></i>
+            <span id="toastMessage" class="font-semibold"></span>
+        </div>
+    </div>
 
-      const newTransaction = {
-          id: Date.now(), // Unique ID
-          description: description,
-          amount: finalAmount,
-          type: type,
-          date: date
-      };
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-gray-800 mt-16 py-8 border-t border-gray-200 dark:border-gray-700">
+        <div class="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400">
+            <p class="mb-2">💰 <strong class="gradient-text">FinanceFlow Pro</strong> - Your Financial Freedom Partner</p>
+            <p class="text-sm">Built with ❤️ using Tailwind CSS • Open Source • MIT License</p>
+            <div class="mt-4 flex justify-center space-x-4">
+                <a href="#" class="hover:text-primary transition"><i class="fab fa-github text-xl"></i></a>
+                <a href="#" class="hover:text-primary transition"><i class="fab fa-twitter text-xl"></i></a>
+                <a href="#" class="hover:text-primary transition"><i class="fab fa-linkedin text-xl"></i></a>
+            </div>
+        </div>
+    </footer>
 
-      transactions.push(newTransaction);
-      saveTransactions();
+    <script>
+        // ============================================
+        // DATA STORAGE
+        // ============================================
+        let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+        let investments = JSON.parse(localStorage.getItem('investments')) || [];
+        let darkMode = localStorage.getItem('darkMode') === 'true';
 
-      // Clear form and re-render
-      form.reset();
-      renderTransactions();
-      updateBalanceDisplay();
-  }
+        // Charts
+        let incomeExpensesChart, portfolioChart, predictionChart;
 
-  // --- INITIALIZATION ---
+        // ============================================
+        // INITIALIZE APP
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set dates to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateTransaction').value = today;
+            document.getElementById('dateInvestment').value = today;
+            
+            // Apply dark mode
+            if (darkMode) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('darkModeToggle').innerHTML = '<i class="fas fa-sun"></i>';
+            }
+            
+            // Load data
+            updateDashboard();
+            updateAllTransactions();
+            updateInvestments();
+            fetchCryptoPrices();
+            calculateBudget();
+            
+            // Set active tab
+            switchTab('dashboard');
+            
+            // Fetch crypto prices every 60 seconds
+            setInterval(fetchCryptoPrices, 60000);
+        });
 
-  function initializeApp() {
-      renderTransactions();
-      updateBalanceDisplay(); // Update the balance area (even if visually hidden in the prompt structure)
+        // ============================================
+        // DARK MODE TOGGLE
+        // ============================================
+        document.getElementById('darkModeToggle').addEventListener('click', function() {
+            darkMode = !darkMode;
+            localStorage.setItem('darkMode', darkMode);
+            document.documentElement.classList.toggle('dark');
+            this.innerHTML = darkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            
+            // Update charts
+            if (incomeExpensesChart) updateDashboard();
+        });
 
-      // Setup Event Listener for the form (Assuming we add a form element in HTML for this demo)
-      const form = document.getElementById('add-transaction-form');
-      if (form) {
-          form.addEventListener('submit', handleAddTransaction);
-      } else {
-          console.error("Error: Form with ID 'add-transaction-form' not found.");
-      }
-  }
+        // ============================================
+        // TAB SWITCHING
+        // ============================================
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('border-primary', 'text-primary');
+                btn.classList.add('border-transparent');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+            document.getElementById(tabName + '-tab').classList.add('animate-fade-in');
+            
+            // Add active class to button
+            const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
+            activeBtn.classList.add('border-primary', 'text-primary');
+            activeBtn.classList.remove('border-transparent');
+        }
 
-  // Attach basic styling for demo purposes since the prompt lacks them
-  const style = document.createElement('style');
-  style.innerHTML = `
-      .text-success { color: #28a745; }
-      .text-danger { color: #dc3545; }
-      .card { border: 1px solid #eee; }
-      #transaction-list { margin-top: 15px; }
-      .d-flex { display: flex; }
-      .justify-content-between { justify-content: space-between; }
-      .align-items-center { align-items: center; }
-  `;
-  document.head.appendChild(style);
+        // ============================================
+        // TOAST NOTIFICATION
+        // ============================================
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toastMessage.textContent = message;
+            
+            if (type === 'success') {
+                toastIcon.className = 'fas fa-check-circle text-2xl text-green-400';
+            } else if (type === 'error') {
+                toastIcon.className = 'fas fa-exclamation-circle text-2xl text-red-400';
+            } else if (type === 'info') {
+                toastIcon.className = 'fas fa-info-circle text-2xl text-blue-400';
+            }
+            
+            toast.classList.remove('translate-y-32');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-32');
+            }, 3000);
+        }
 
+        // ============================================
+        // TRANSACTIONS
+        // ============================================
+        document.getElementById('transactionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const transaction = {
+                id: Date.now(),
+                type: document.getElementById('typeTransaction').value,
+                category: document.getElementById('categoryTransaction').value,
+                description: document.getElementById('descriptionTransaction').value,
+                amount: parseFloat(document.getElementById('amountTransaction').value),
+                date: document.getElementById('dateTransaction').value
+            };
+            
+            transactions.push(transaction);
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            
+            this.reset();
+            document.getElementById('dateTransaction').value = new Date().toISOString().split('T')[0];
+            
+            updateDashboard();
+            updateAllTransactions();
+            calculateBudget();
+            
+            showToast('Transaction added successfully!', 'success');
+        });
 
-  // Modify HTML structure slightly to include the necessary form for functionality demonstration
-  const htmlContent = `
-      <div class="container mt-4">
-          <h1 class="mb-4">💰 Mis Finanzas Personales</h1>
+        function updateAllTransactions() {
+            const container = document.getElementById('allTransactions');
+            const recentContainer = document.getElementById('recentTransactions');
+            
+            if (transactions.length === 0) {
+                container.innerHTML = '<div class="text-center py-12 text-gray-400"><i class="fas fa-inbox text-5xl mb-4"></i><p>No transactions yet</p></div>';
+                recentContainer.innerHTML = '<div class="text-center py-8 text-gray-400"><i class="fas fa-inbox text-3xl mb-2"></i><p class="text-sm">No transactions yet</p></div>';
+                return;
+            }
+            
+            const sorted = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // All transactions
+            container.innerHTML = sorted.map(t => createTransactionCard(t, true)).join('');
+            
+            // Recent (last 5)
+            recentContainer.innerHTML = sorted.slice(0, 5).map(t => createTransactionCard(t, false)).join('');
+        }
 
-          <!-- Summary Card -->
-          <div class="card p-4 mb-4 shadow-sm">
-              <h2 class="card-title">Saldo Actual</h2>
-              <h1 id="balance-display" class="text-primary">$0.00</h1>
-              <p class="mt-2">Saldo calculado a partir de todas las transacciones registradas.</p>
-          </div>
+        function createTransactionCard(t, showDelete = true) {
+            const isIncome = t.type === 'income';
+            const color = isIncome ? 'green' : 'red';
+            const icon = isIncome ? 'arrow-down' : 'arrow-up';
+            const borderClass = isIncome ? 'transaction-income' : 'transaction-expense';
+            
+            return `
+                <div class="${borderClass} bg-white dark:bg-gray-700 rounded-lg p-4 hover:shadow-md transition">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-${color}-100 dark:bg-${color}-900/30 rounded-full flex items-center justify-center">
+                                <i class="fas fa-${icon} text-${color}-600 dark:text-${color}-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 dark:text-white">${t.description}</h4>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">${getCategoryEmoji(t.category)} ${t.category} • ${formatDate(t.date)}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-bold text-${color}-600 dark:text-${color}-400">${isIncome ? '+' : '-'}€${t.amount.toFixed(2)}</p>
+                            ${showDelete ? `<button onclick="deleteTransaction(${t.id})" class="text-red-500 hover:text-red-700 text-sm mt-1"><i class="fas fa-trash"></i> Delete</button>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
 
-          <!-- Form for Adding Transactions -->
-          <div class="card p-4 mb-5 shadow-sm">
-              <h3 class="card-title mb-3">➕ Registrar Nueva Transacción</h3>
-              <form id="add-transaction-form">
-                  <div class="row mb-3">
-                      <div class="col-md-6">
-                          <label for="description" class="form-label">Descripción</label>
-                          <input type="text" class="form-control" id="description" required>
-                      </div>
-                      <div class="col-md-3">
-                          <label for="type" class="form-label">Tipo</label>
-                          <select class="form-select" id="type" required>
-                              <option value="expense">Gasto</option>
-                              <option value="income">Ingreso</option>
-                          </select>
-                      </div>
-                      <div class="col-md-3">
-                          <label for="amount" class="form-label">Monto ($)</label>
-                          <input type="number" class="form-control" id="amount" placeholder="Ej: 150.00" required
-  min="0.01" step="0.01">
-                      </div>
-                  </div>
-                  <div class="row mb-3">
-                      <div class="col-md-6">
-                          <label for="date" class="form-label">Fecha</label>
-                          <input type="date" class="form-control" id="date" required>
-                      </div>
-                  </div>
-                  <button type="submit" class="btn btn-primary">Guardar Transacción</button>
-              </form>
-          </div>
+        function deleteTransaction(id) {
+            if (confirm('Are you sure you want to delete this transaction?')) {
+                transactions = transactions.filter(t => t.id !== id);
+                localStorage.setItem('transactions', JSON.stringify(transactions));
+                updateDashboard();
+                updateAllTransactions();
+                calculateBudget();
+                showToast('Transaction deleted', 'info');
+            }
+        }
 
-          <!-- Transaction List Area (Original structure content remains here) -->
-      </div>
-  `;
+        function filterTransactions() {
+            const type = document.getElementById('filterType').value;
+            const search = document.getElementById('searchTransaction').value.toLowerCase();
+            
+            let filtered = transactions;
+            
+            if (type !== 'all') {
+                filtered = filtered.filter(t => t.type === type);
+            }
+            
+            if (search) {
+                filtered = filtered.filter(t => 
+                    t.description.toLowerCase().includes(search) ||
+                    t.category.toLowerCase().includes(search)
+                );
+            }
+            
+            const sorted = filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            document.getElementById('allTransactions').innerHTML = sorted.length > 0
+                ? sorted.map(t => createTransactionCard(t, true)).join('')
+                : '<div class="text-center py-12 text-gray-400"><i class="fas fa-search text-5xl mb-4"></i><p>No transactions found</p></div>';
+        }
 
-  // Overwrite the entire body content with the functional structure
-  document.body.innerHTML = htmlContent;
+        // ============================================
+        // INVESTMENTS
+        // ============================================
+        document.getElementById('investmentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const amount = parseFloat(document.getElementById('amountInvestment').value);
+            const units = parseFloat(document.getElementById('unitsInvestment').value);
+            
+            const investment = {
+                id: Date.now(),
+                type: document.getElementById('typeInvestment').value,
+                name: document.getElementById('nameInvestment').value,
+                amount: amount,
+                units: units,
+                purchasePrice: amount / units,
+                date: document.getElementById('dateInvestment').value
+            };
+            
+            investments.push(investment);
+            localStorage.setItem('investments', JSON.stringify(investments));
+            
+            this.reset();
+            document.getElementById('dateInvestment').value = new Date().toISOString().split('T')[0];
+            
+            updateInvestments();
+            updateDashboard();
+            
+            showToast('Investment added successfully!', 'success');
+        });
 
+        function updateInvestments() {
+            const container = document.getElementById('investmentsList');
+            
+            if (investments.length === 0) {
+                container.innerHTML = '<div class="text-center py-12 text-gray-400"><i class="fas fa-chart-line text-5xl mb-4"></i><p>No investments yet</p></div>';
+                document.getElementById('portfolioValue').textContent = '€0.00';
+                document.getElementById('portfolioPL').textContent = '€0.00';
+                document.getElementById('portfolioROI').textContent = '0%';
+                return;
+            }
+            
+            let totalValue = 0;
+            let totalInvested = investments.reduce((sum, inv) => sum + inv.amount, 0);
+            
+            container.innerHTML = investments.map(inv => {
+                const currentValue = inv.amount; // In real app, fetch current price
+                totalValue += currentValue;
+                const pl = currentValue - inv.amount;
+                const plPercent = ((pl / inv.amount) * 100).toFixed(2);
+                
+                return `
+                    <div class="transaction-investment bg-white dark:bg-gray-700 rounded-lg p-4 hover:shadow-md transition">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-chart-line text-blue-600 dark:text-blue-400"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800 dark:text-white">${inv.type} - ${inv.name}</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">${inv.units} units @ €${inv.purchasePrice.toFixed(2)} • ${formatDate(inv.date)}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-lg font-bold text-blue-600 dark:text-blue-400">€${currentValue.toFixed(2)}</p>
+                                <p class="text-sm ${pl >= 0 ? 'text-green-600' : 'text-red-600'}">${pl >= 0 ? '+' : ''}€${pl.toFixed(2)} (${plPercent}%)</p>
+                                <button onclick="deleteInvestment(${inv.id})" class="text-red-500 hover:text-red-700 text-sm mt-1"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            const totalPL = totalValue - totalInvested;
+            const totalROI = ((totalPL / totalInvested) * 100).toFixed(2);
+            
+            document.getElementById('portfolioValue').textContent = `€${totalValue.toFixed(2)}`;
+            document.getElementById('portfolioPL').textContent = `${totalPL >= 0 ? '+' : ''}€${totalPL.toFixed(2)}`;
+            document.getElementById('portfolioROI').textContent = `${totalROI}%`;
+        }
 
-  // Re-run initialization now that the DOM is fully populated
-  initializeApp();
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"></script>
-  </html>
+        function deleteInvestment(id) {
+            if (confirm('Are you sure you want to delete this investment?')) {
+                investments = investments.filter(inv => inv.id !== id);
+                localStorage.setItem('investments', JSON.stringify(investments));
+                updateInvestments();
+                updateDashboard();
+                showToast('Investment deleted', 'info');
+            }
+        }
+
+        // ============================================
+        // CRYPTO PRICES
+        // ============================================
+        async function fetchCryptoPrices() {
+            try {
+                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,cardano,solana&vs_currencies=eur&include_24hr_change=true');
+                const data = await response.json();
+                
+                const cryptos = [
+                    { id: 'bitcoin', name: 'Bitcoin', symbol: '₿', data: data.bitcoin },
+                    { id: 'ethereum', name: 'Ethereum', symbol: 'Ξ', data: data.ethereum },
+                    { id: 'cardano', name: 'Cardano', symbol: 'ADA', data: data.cardano },
+                    { id: 'solana', name: 'Solana', symbol: 'SOL', data: data.solana }
+                ];
+                
+                const html = cryptos.map(crypto => {
+                    const change = crypto.data.eur_24h_change;
+                    const isPositive = change >= 0;
+                    
+                    return `
+                        <div class="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-lg">${crypto.symbol}</span>
+                                <span class="text-xs text-gray-600 dark:text-gray-400">${crypto.name}</span>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-semibold text-gray-800 dark:text-white">€${crypto.data.eur.toLocaleString()}</p>
+                                <p class="text-xs ${isPositive ? 'text-green-600' : 'text-red-600'}">${isPositive ? '+' : ''}${change.toFixed(2)}%</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                document.getElementById('cryptoPrices').innerHTML = html;
+                document.getElementById('marketPrices').innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error fetching crypto prices:', error);
+            }
+        }
+
+        // ============================================
+        // DASHBOARD
+        // ============================================
+        function updateDashboard() {
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            
+            // Calculate totals
+            let monthIncome = 0;
+            let monthExpenses = 0;
+            let totalIncome = 0;
+            let totalExpenses = 0;
+            
+            transactions.forEach(t => {
+                const tDate = new Date(t.date);
+                if (t.type === 'income') {
+                    totalIncome += t.amount;
+                    if (tDate.getMonth() === currentMonth && tDate.getFullYear() === currentYear) {
+                        monthIncome += t.amount;
+                    }
+                } else {
+                    totalExpenses += t.amount;
+                    if (tDate.getMonth() === currentMonth && tDate.getFullYear() === currentYear) {
+                        monthExpenses += t.amount;
+                    }
+                }
+            });
+            
+            const totalInvested = investments.reduce((sum, inv) => sum + inv.amount, 0);
+            const netWorth = totalIncome - totalExpenses - totalInvested;
+            
+            // Update UI
+            document.getElementById('totalBalance').textContent = `€${netWorth.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('monthIncome').textContent = `€${monthIncome.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('monthExpenses').textContent = `€${monthExpenses.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('totalInvestments').textContent = `€${totalInvested.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            
+            // Progress bars
+            const maxAmount = Math.max(monthIncome, monthExpenses, 1);
+            document.getElementById('incomeProgress').style.width = `${(monthIncome / maxAmount) * 100}%`;
+            document.getElementById('expensesProgress').style.width = `${(monthExpenses / maxAmount) * 100}%`;
+            
+            // Update charts
+            updateIncomeExpensesChart();
+            updatePortfolioChart();
+        }
+
+        function updateIncomeExpensesChart() {
+            const ctx = document.getElementById('incomeExpensesChart');
+            if (!ctx) return;
+            
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            
+            const last6Months = [];
+            const incomeData = [];
+            const expenseData = [];
+            
+            for (let i = 5; i >= 0; i--) {
+                let month = currentMonth - i;
+                let year = now.getFullYear();
+                
+                if (month < 0) {
+                    month += 12;
+                    year -= 1;
+                }
+                
+                last6Months.push(months[month]);
+                
+                const monthIncome = transactions
+                    .filter(t => {
+                        const d = new Date(t.date);
+                        return t.type === 'income' && d.getMonth() === month && d.getFullYear() === year;
+                    })
+                    .reduce((sum, t) => sum + t.amount, 0);
+                
+                const monthExpense = transactions
+                    .filter(t => {
+                        const d = new Date(t.date);
+                        return t.type === 'expense' && d.getMonth() === month && d.getFullYear() === year;
+                    })
+                    .reduce((sum, t) => sum + t.amount, 0);
+                
+                incomeData.push(monthIncome);
+                expenseData.push(monthExpense);
+            }
+            
+            if (incomeExpensesChart) {
+                incomeExpensesChart.destroy();
+            }
+            
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#e5e7eb' : '#374151';
+            const gridColor = isDark ? '#374151' : '#e5e7eb';
+            
+            incomeExpensesChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: last6Months,
+                    datasets: [
+                        {
+                            label: 'Income',
+                            data: incomeData,
+                            backgroundColor: 'rgba(74, 222, 128, 0.8)',
+                            borderColor: 'rgb(34, 197, 94)',
+                            borderWidth: 2,
+                            borderRadius: 8
+                        },
+                        {
+                            label: 'Expenses',
+                            data: expenseData,
+                            backgroundColor: 'rgba(248, 113, 113, 0.8)',
+                            borderColor: 'rgb(239, 68, 68)',
+                            borderWidth: 2,
+                            borderRadius: 8
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: textColor,
+                                font: { size: 12, weight: 'bold' }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: textColor,
+                                callback: value => '€' + value.toLocaleString()
+                            },
+                            grid: { color: gridColor }
+                        },
+                        x: {
+                            ticks: { color: textColor },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updatePortfolioChart() {
+            const ctx = document.getElementById('portfolioChart');
+            if (!ctx) return;
+            
+            if (investments.length === 0) {
+                if (portfolioChart) portfolioChart.destroy();
+                ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
+                const centerX = ctx.width / 2;
+                const centerY = ctx.height / 2;
+                ctx.getContext('2d').fillStyle = document.documentElement.classList.contains('dark') ? '#9ca3af' : '#6b7280';
+                ctx.getContext('2d').font = '16px Inter';
+                ctx.getContext('2d').textAlign = 'center';
+                ctx.getContext('2d').fillText('No investments yet', centerX, centerY);
+                return;
+            }
+            
+            const typeData = {};
+            investments.forEach(inv => {
+                typeData[inv.type] = (typeData[inv.type] || 0) + inv.amount;
+            });
+            
+            const labels = Object.keys(typeData);
+            const data = Object.values(typeData);
+            const colors = [
+                'rgba(59, 130, 246, 0.8)',
+                'rgba(168, 85, 247, 0.8)',
+                'rgba(236, 72, 153, 0.8)',
+                'rgba(251, 146, 60, 0.8)',
+                'rgba(34, 197, 94, 0.8)',
+                'rgba(14, 165, 233, 0.8)'
+            ];
+            
+            if (portfolioChart) {
+                portfolioChart.destroy();
+            }
+            
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#e5e7eb' : '#374151';
+            
+            portfolioChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderWidth: 3,
+                        borderColor: isDark ? '#1f2937' : '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: textColor,
+                                padding: 15,
+                                font: { size: 12, weight: 'bold' }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: €${value.toFixed(2)} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============================================
+        // PREDICTOR
+        // ============================================
+        function calculatePredictions() {
+            const monthlySavings = parseFloat(document.getElementById('monthlySavings').value);
+            const annualReturn = parseFloat(document.getElementById('annualReturn').value) / 100;
+            
+            const currentCapital = transactions
+                .filter(t => t.type === 'income')
+                .reduce((sum, t) => sum + t.amount, 0) -
+                transactions
+                .filter(t => t.type === 'expense')
+                .reduce((sum, t) => sum + t.amount, 0);
+            
+            const periods = [5, 10, 20, 30, 40, 50];
+            const predictions = [];
+            
+            periods.forEach(years => {
+                const months = years * 12;
+                const monthlyRate = annualReturn / 12;
+                
+                // Future value with periodic payments
+                let futureValue = currentCapital * Math.pow(1 + monthlyRate, months);
+                futureValue += monthlySavings * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate);
+                
+                const totalContributed = currentCapital + (monthlySavings * months);
+                const gains = futureValue - totalContributed;
+                const roi = ((gains / totalContributed) * 100).toFixed(1);
+                
+                let status = 'danger';
+                if (roi > 200) status = 'success';
+                else if (roi > 100) status = 'info';
+                else if (roi > 50) status = 'warning';
+                
+                predictions.push({ years, futureValue, totalContributed, gains, roi, status });
+            });
+            
+            displayPredictions(predictions);
+            displayPredictionChart(predictions);
+            displayAnalysis(predictions, monthlySavings, annualReturn);
+        }
+
+        function displayPredictions(predictions) {
+            const grid = document.getElementById('predictionsGrid');
+            
+            const statusColors = {
+                success: 'from-green-500 to-emerald-600',
+                info: 'from-blue-500 to-cyan-600',
+                warning: 'from-yellow-500 to-orange-600',
+                danger: 'from-red-500 to-pink-600'
+            };
+            
+            const statusIcons = {
+                success: 'rocket',
+                info: 'check-circle',
+                warning: 'exclamation-circle',
+                danger: 'times-circle'
+            };
+            
+            const statusLabels = {
+                success: 'Excellent!',
+                info: 'Good Path',
+                warning: 'Needs Work',
+                danger: 'High Risk'
+            };
+            
+            grid.innerHTML = predictions.map(p => `
+                <div class="bg-gradient-to-br ${statusColors[p.status]} rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-2xl font-bold">${p.years} Years</h4>
+                        <i class="fas fa-${statusIcons[p.status]} text-3xl opacity-80"></i>
+                    </div>
+                    <div class="space-y-2 mb-4">
+                        <p class="text-4xl font-bold">€${(p.futureValue / 1000).toFixed(0)}K</p>
+                        <div class="text-sm space-y-1 opacity-90">
+                            <p>Contributed: €${(p.totalContributed / 1000).toFixed(0)}K</p>
+                            <p>Gains: €${(p.gains / 1000).toFixed(0)}K</p>
+                            <p>ROI: ${p.roi}%</p>
+                        </div>
+                    </div>
+                    <div class="bg-white/20 rounded-lg px-3 py-2 text-center font-semibold text-sm">
+                        ${statusLabels[p.status]}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function displayPredictionChart(predictions) {
+            const ctx = document.getElementById('predictionChart');
+            if (!ctx) return;
+            
+            if (predictionChart) {
+                predictionChart.destroy();
+            }
+            
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#e5e7eb' : '#374151';
+            const gridColor = isDark ? '#374151' : '#e5e7eb';
+            
+            predictionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: predictions.map(p => `${p.years}y`),
+                    datasets: [
+                        {
+                            label: 'Projected Wealth',
+                            data: predictions.map(p => p.futureValue),
+                            borderColor: 'rgb(99, 102, 241)',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        },
+                        {
+                            label: 'Total Contributed',
+                            data: predictions.map(p => p.totalContributed),
+                            borderColor: 'rgb(234, 179, 8)',
+                            backgroundColor: 'rgba(234, 179, 8, 0.1)',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.4,
+                            pointRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: textColor,
+                                font: { size: 13, weight: 'bold' }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': €' + context.parsed.y.toLocaleString('en-US', {maximumFractionDigits: 0});
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: textColor,
+                                callback: value => '€' + (value / 1000).toFixed(0) + 'K'
+                            },
+                            grid: { color: gridColor }
+                        },
+                        x: {
+                            ticks: { color: textColor },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function displayAnalysis(predictions, monthlySavings, annualReturn) {
+            const container = document.getElementById('analysisContent');
+            const pred50 = predictions[5]; // 50 years
+            const pred30 = predictions[3]; // 30 years
+            
+            let insights = [];
+            
+            // Millionaire analysis
+            if (pred50.futureValue >= 1000000) {
+                insights.push({
+                    icon: 'trophy',
+                    text: `<strong>Congratulations!</strong> At this pace, you'll have over €${(pred50.futureValue / 1000000).toFixed(1)}M in 50 years!`
+                });
+            } else {
+                const needed = Math.ceil((1000000 - pred50.futureValue) / (50 * 12));
+                insights.push({
+                    icon: 'bullseye',
+                    text: `To reach €1M in 50 years, increase monthly savings by €${needed}.`
+                });
+            }
+            
+            // Return rate analysis
+            if (annualReturn * 100 < 7) {
+                insights.push({
+                    icon: 'chart-line',
+                    text: 'Consider diversifying into index ETFs for better returns (7-10% historical average).'
+                });
+            }
+            
+            // Savings rate
+            if (monthlySavings < 500) {
+                insights.push({
+                    icon: 'piggy-bank',
+                    text: 'Try to increase your monthly savings. Each extra €100 can mean tens of thousands in the future!'
+                });
+            }
+            
+            // 30-year milestone
+            insights.push({
+                icon: 'calendar-check',
+                text: `In 30 years, you'll have <strong>€${(pred30.futureValue / 1000).toFixed(0)}K</strong>, with <strong>€${(pred30.gains / 1000).toFixed(0)}K</strong> in pure gains!`
+            });
+            
+            // Power of compound interest
+            insights.push({
+                icon: 'magic',
+                text: 'Compound interest is your superpower! The earlier you start, the more you earn exponentially.'
+            });
+            
+            // Recommendations
+            const recommendations = [
+                '🛡️ Keep 6 months of expenses as emergency fund',
+                '📊 Diversify: 80-90% stocks/ETFs, 10-20% bonds, max 5-10% crypto',
+                '📅 Rebalance your portfolio annually',
+                '⏰ Don\'t invest money you\'ll need short-term',
+                '🎯 Automate your investments (dollar-cost averaging)',
+                '📚 Keep learning about personal finance'
+            ];
+            
+            container.innerHTML = `
+                <div class="space-y-4">
+                    ${insights.map(insight => `
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-${insight.icon} text-2xl mt-1"></i>
+                            <p class="flex-1">${insight.text}</p>
+                        </div>
+                    `).join('')}
+                    
+                    <div class="mt-6 pt-6 border-t border-white/20">
+                        <h4 class="text-xl font-bold mb-4"><i class="fas fa-lightbulb mr-2"></i>Expert Recommendations</h4>
+                        <ul class="space-y-2">
+                            ${recommendations.map(rec => `<li class="flex items-start"><span class="mr-2">•</span><span>${rec}</span></li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // BUDGET TRACKING
+        // ============================================
+        function calculateBudget() {
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            
+            const monthTransactions = transactions.filter(t => {
+                const d = new Date(t.date);
+                return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+            });
+            
+            const monthIncome = monthTransactions
+                .filter(t => t.type === 'income')
+                .reduce((sum, t) => sum + t.amount, 0);
+            
+            const monthExpenses = monthTransactions
+                .filter(t => t.type === 'expense')
+                .reduce((sum, t) => sum + t.amount, 0);
+            
+            // 50/30/20 Rule
+            const needs = monthIncome * 0.5;
+            const wants = monthIncome * 0.3;
+            const savings = monthIncome * 0.2;
+            
+            const needsCategories = ['housing', 'utilities', 'food', 'transport', 'healthcare'];
+            const actualNeeds = monthTransactions
+                .filter(t => t.type === 'expense' && needsCategories.includes(t.category))
+                .reduce((sum, t) => sum + t.amount, 0);
+            
+            const wantsCategories = ['entertainment', 'shopping', 'other'];
+            const actualWants = monthTransactions
+                .filter(t => t.type === 'expense' && wantsCategories.includes(t.category))
+                .reduce((sum, t) => sum + t.amount, 0);
+            
+            const actualSavings = monthIncome - monthExpenses;
+            
+            // Update UI
+            document.getElementById('needs50').textContent = needs.toFixed(0);
+            document.getElementById('wants30').textContent = wants.toFixed(0);
+            document.getElementById('savings20').textContent = savings.toFixed(0);
+            
+            const needsPercent = (actualNeeds / needs * 100).toFixed(0);
+            const wantsPercent = (actualWants / wants * 100).toFixed(0);
+            const savingsPercent = (actualSavings / savings * 100).toFixed(0);
+            
+            document.getElementById('needsPercent').textContent = `${needsPercent}%`;
+            document.getElementById('wantsPercent').textContent = `${wantsPercent}%`;
+            document.getElementById('savingsPercent').textContent = `${savingsPercent}%`;
+            
+            document.getElementById('needsBar').style.width = `${Math.min(needsPercent, 100)}%`;
+            document.getElementById('wantsBar').style.width = `${Math.min(wantsPercent, 100)}%`;
+            document.getElementById('savingsBar').style.width = `${Math.min(savingsPercent, 100)}%`;
+            
+            // Category breakdown
+            const categories = {};
+            monthTransactions.filter(t => t.type === 'expense').forEach(t => {
+                categories[t.category] = (categories[t.category] || 0) + t.amount;
+            });
+            
+            const categoryHTML = Object.entries(categories).map(([cat, amount]) => {
+                const percent = (amount / monthExpenses * 100).toFixed(1);
+                return `
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                        <div class="flex justify-between mb-2">
+                            <span class="font-semibold text-gray-700 dark:text-gray-300">${getCategoryEmoji(cat)} ${cat}</span>
+                            <span class="text-gray-600 dark:text-gray-400">€${amount.toFixed(2)}</span>
+                        </div>
+                        <div class="h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                            <div class="h-full bg-primary rounded-full" style="width: ${percent}%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${percent}% of expenses</p>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('categoryBudgets').innerHTML = categoryHTML || '<p class="text-gray-400 text-center col-span-2">No expenses this month</p>';
+            
+            // Budget insights
+            const insights = [];
+            
+            if (actualSavings < 0) {
+                insights.push({
+                    type: 'danger',
+                    icon: 'exclamation-triangle',
+                    text: 'You\'re spending more than you earn! Review your expenses immediately.'
+                });
+            } else if (actualSavings > savings) {
+                insights.push({
+                    type: 'success',
+                    icon: 'check-circle',
+                    text: `Excellent! You\'re saving €${(actualSavings - savings).toFixed(2)} more than the 20% rule!`
+                });
+            }
+            
+            if (actualNeeds > needs) {
+                insights.push({
+                    type: 'warning',
+                    icon: 'info-circle',
+                    text: 'Your essential needs exceed 50% of income. Look for ways to reduce fixed costs.'
+                });
+            }
+            
+            if (actualWants > wants) {
+                insights.push({
+                    type: 'warning',
+                    icon: 'shopping-bag',
+                    text: 'You\'re overspending on wants. Try to cut back discretionary spending.'
+                });
+            }
+            
+            const savingsRate = ((actualSavings / monthIncome) * 100).toFixed(1);
+            insights.push({
+                type: 'info',
+                icon: 'percentage',
+                text: `Your savings rate this month is ${savingsRate}%. Aim for 20% or higher!`
+            });
+            
+            const insightsHTML = insights.map(insight => {
+                const colors = {
+                    success: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-300',
+                    warning: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-yellow-300',
+                    danger: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border-red-300',
+                    info: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-300'
+                };
+                
+                return `
+                    <div class="${colors[insight.type]} border-l-4 p-4 rounded">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-${insight.icon} text-xl mt-1"></i>
+                            <p>${insight.text}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('budgetInsights').innerHTML = insightsHTML || '<p class="text-gray-400">Add transactions to see insights</p>';
+        }
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        function getCategoryEmoji(category) {
+            const emojis = {
+                salary: '💼',
+                freelance: '💻',
+                business: '🏢',
+                investment: '📈',
+                food: '🍔',
+                transport: '🚗',
+                entertainment: '🎮',
+                housing: '🏠',
+                utilities: '💡',
+                healthcare: '⚕️',
+                education: '📚',
+                shopping: '🛍️',
+                other: '📦'
+            };
+            return emojis[category] || '📌';
+        }
+
+        function exportData() {
+            const data = {
+                transactions,
+                investments,
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `financeflow-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            
+            showToast('Data exported successfully!', 'success');
+        }
+    </script>
+</body>
+</html>
